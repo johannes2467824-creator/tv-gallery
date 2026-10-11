@@ -1,62 +1,47 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>My TV Gallery</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+
 <style>
 
-/* Rainbow in the middle of the TV */
+/* GENERAL */
 
-#rainbow {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-
-    font-size: 150px;
-    z-index: 20;
-
-    filter: drop-shadow(0 0 20px rgba(255,255,255,0.5));
-
-    animation: rainbowFloat 4s ease-in-out infinite;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
-
-@keyframes rainbowFloat {
-    0%, 100% {
-        transform: translate(-50%, -50%) translateY(0);
-    }
-
-    50% {
-        transform: translate(-50%, -50%) translateY(-20px);
-    }
-}
-
 
 html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #000;
-    font-family: Arial, sans-serif;
+    background: black;
 }
 
-/* Photo layers */
+/* PHOTO SLIDESHOW */
 
 .slide {
     position: absolute;
     inset: 0;
+
     width: 100%;
     height: 100%;
 
-    background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
+    background-size: cover;
 
     opacity: 0;
+
     transition: opacity 2s ease-in-out;
 }
 
@@ -64,46 +49,115 @@ html, body {
     opacity: 1;
 }
 
-/* Optional clock */
+/* DARK OVERLAY FOR READABILITY */
 
-#clock {
+.overlay {
     position: absolute;
-    bottom: 35px;
-    right: 45px;
+    inset: 0;
+
+    background: rgba(0,0,0,0.25);
+
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* CLOCK CONTAINER */
+
+#clockContainer {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    width: 90%;
+
+    text-align: center;
 
     color: white;
-    font-size: 2800px;
+
+    z-index: 10;
+
+    pointer-events: none;
+
+    text-shadow: 0 4px 25px rgba(0,0,0,0.8);
+}
+
+/* CURSIVE CLOCK */
+
+#fancyClock {
+    font-family: 'Great Vibes', cursive;
+
+    font-size: clamp(100px, 15vw, 220px);
+
+    font-weight: normal;
+
+    line-height: 1.3;
+}
+
+/* DECORATIVE DIVIDER */
+
+.clockDivider {
+    width: 100px;
+    height: 1px;
+
+    background: rgba(255,255,255,0.85);
+
+    margin: 0 auto 25px auto;
+}
+
+/* DATE */
+
+#currentDate {
+    font-family: 'Montserrat', sans-serif;
+
+    font-size: clamp(15px, 2vw, 27px);
+
     font-weight: 300;
 
-    text-shadow: 0 2px 10px #000;
+    letter-spacing: 4px;
+
+    text-transform: uppercase;
+}
+
+/* SMALL BOTTOM LABEL */
+
+#bottomLabel {
+    position: absolute;
+
+    bottom: 30px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    font-family: 'Montserrat', sans-serif;
+
+    font-size: 11px;
+
+    letter-spacing: 5px;
+
+    color: rgba(255,255,255,0.65);
+
     z-index: 10;
-    display: none;
 }
 
 </style>
 </head>
 
 <body>
-<script>
-function enterFullscreen() {
-    const page = document.documentElement;
 
-    if (page.requestFullscreen) {
-        page.requestFullscreen().catch(() => {});
-    } else if (page.webkitRequestFullscreen) {
-        page.webkitRequestFullscreen();
-    }
-}
-
-document.addEventListener("click", enterFullscreen);
-document.addEventListener("keydown", enterFullscreen);
-</script>
+<!-- PHOTO LAYERS -->
 
 <div id="slide1" class="slide active"></div>
 <div id="slide2" class="slide"></div>
 
+<!-- DARK OVERLAY -->
 
-<!-- Elegant central clock -->
+<div class="overlay"></div>
+
+<!-- CLOCK -->
 
 <div id="clockContainer">
 
@@ -111,38 +165,47 @@ document.addEventListener("keydown", enterFullscreen);
 
     <div class="clockDivider"></div>
 
-    <div id="currentDate">Loading date...</div>
+    <div id="currentDate">Loading...</div>
 
 </div>
 
+<!-- BOTTOM LABEL -->
+
+<div id="bottomLabel">HOME</div>
+
 <script>
 
-/* =========================
+/* ==================================
    YOUR PHOTOS
-========================= */
+================================== */
 
 const photos = [
+
     "photos/photo1.jpg",
     "photos/photo2.jpg",
     "photos/photo3.jpg"
+
 ];
 
-/* =========================
+/* ==================================
    SETTINGS
-========================= */
+================================== */
 
-// Time between photos (milliseconds)
+// Time between photos
 const slideDuration = 15000;
 
-// Show clock?
-const showClock = false;
-
-// Random photo order?
+// Random order?
 const shuffle = false;
 
-/* =========================
+// Clock visibility
+const showClock = true;
+
+// Dark overlay strength (0 to 1)
+const overlayStrength = 0.25;
+
+/* ==================================
    SLIDESHOW
-========================= */
+================================== */
 
 let photoIndex = 0;
 let activeSlide = 0;
@@ -156,11 +219,13 @@ if (shuffle) {
     photos.sort(() => Math.random() - 0.5);
 }
 
-// First photo
+// Load first photo
 slides[0].style.backgroundImage =
     `url("${photos[0]}")`;
 
 function nextPhoto() {
+
+    if (photos.length < 2) return;
 
     photoIndex = (photoIndex + 1) % photos.length;
 
@@ -174,6 +239,7 @@ function nextPhoto() {
             `url("${photos[photoIndex]}")`;
 
         slides[nextSlide].classList.add("active");
+
         slides[activeSlide].classList.remove("active");
 
         activeSlide = nextSlide;
@@ -182,34 +248,78 @@ function nextPhoto() {
     image.src = photos[photoIndex];
 }
 
-// Start slideshow
+// Automatic slideshow
 if (photos.length > 1) {
     setInterval(nextPhoto, slideDuration);
 }
 
-/* =========================
-   CLOCK
-========================= */
+/* ==================================
+   CLOCK & DATE
+================================== */
+
+function updateClock() {
+
+    const now = new Date();
+
+    // Time (24-hour format)
+    const time = now.toLocaleTimeString("sv-SE", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+    });
+
+    // Date
+    const date = now.toLocaleDateString("en-GB", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+    });
+
+    document.getElementById("fancyClock").textContent = time;
+
+    document.getElementById("currentDate").textContent = date;
+}
 
 if (showClock) {
 
-    const clock = document.getElementById("clock");
-    clock.style.display = "block";
+    updateClock();
 
-    function updateClock() {
+    setInterval(updateClock, 1000);
 
-        const now = new Date();
+} else {
 
-        clock.textContent =
-            now.toLocaleTimeString("sv-SE", {
-                hour: "2-digit",
-                minute: "2-digit"
-            });
+    document.getElementById("clockContainer").style.display = "none";
+
+}
+
+/* ==================================
+   OVERLAY
+================================== */
+
+document.querySelector(".overlay").style.background =
+    `rgba(0,0,0,${overlayStrength})`;
+
+/* ==================================
+   FULLSCREEN REQUEST
+================================== */
+
+function enterFullscreen() {
+
+    const page = document.documentElement;
+
+    if (page.requestFullscreen) {
+        const result = page.requestFullscreen();
+        if (result && result.catch) result.catch(() => {});
     }
 
-    updateClock();
-    setInterval(updateClock, 1000);
+    else if (page.webkitRequestFullscreen) {
+        page.webkitRequestFullscreen();
+    }
 }
+
+document.addEventListener("click", enterFullscreen);
+document.addEventListener("keydown", enterFullscreen);
 
 </script>
 
