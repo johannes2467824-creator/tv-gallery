@@ -535,6 +535,7 @@ function setWeather(type, temperature = null) {
     }
 
     currentWeather = type;
+    updateWeatherAudio(type);
 
     const settings = weatherSettings[type];
 
@@ -674,7 +675,7 @@ function animateWeather() {
 ========================================= */
 
 function lightningFlash() {
-
+playThunder();
     const element = document.getElementById("lightning");
 
     element.style.opacity = "0.65";
@@ -882,6 +883,234 @@ async function fetchWeather() {
     }
 }
 
+
+/* =========================================
+   DYNAMIC WEATHER AUDIO ENGINE
+========================================= */
+
+// AUDIO SETTINGS
+
+const enableWeatherSounds = true;
+
+// Master volume: 0.0 to 1.0
+const weatherVolume = 0.35;
+
+// Thunder volume
+const thunderVolume = 0.7;
+
+let audioContext;
+let masterGain;
+let rainGain;
+let windGain;
+let rainSource;
+let windSource;
+
+let audioReady = false;
+
+// Create realistic noise
+function createNoiseBuffer(context) {
+
+    const length = context.sampleRate * 4;
+
+    const buffer = context.createBuffer(
+        1,
+        length,
+        context.sampleRate
+    );
+
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < length; i++) {
+        data[i] = Math.random() * 2 - 1;
+    }
+
+    return buffer;
+}
+
+// Initialize audio
+function initializeWeatherAudio() {
+
+    if (!enableWeatherSounds) return;
+
+    if (audioReady) {
+        if (audioContext.state === "suspended") {
+            audioContext.resume();
+        }
+        return;
+    }
+
+    const AudioContextClass =
+        window.AudioContext ||
+        window.webkitAudioContext;
+
+    if (!AudioContextClass) return;
+
+    audioContext = new AudioContextClass();
+
+    masterGain = audioContext.createGain();
+    masterGain.gain.value = weatherVolume;
+    masterGain.connect(audioContext.destination);
+
+    const noiseBuffer = createNoiseBuffer(audioContext);
+
+    // RAIN GENERATOR
+
+    rainSource = audioContext.createBufferSource();
+    rainSource.buffer = noiseBuffer;
+    rainSource.loop = true;
+
+    const rainFilter = audioContext.createBiquadFilter();
+    rainFilter.type = "lowpass";
+    rainFilter.frequency.value = 2400;
+
+    rainGain = audioContext.createGain();
+    rainGain.gain.value = 0;
+
+    rainSource.connect(rainFilter);
+    rainFilter.connect(rainGain);
+    rainGain.connect(masterGain);
+
+    rainSource.start();
+
+    // WIND GENERATOR
+
+    windSource = audioContext.createBufferSource();
+    windSource.buffer = noiseBuffer;
+    windSource.loop = true;
+
+    const windFilter = audioContext.createBiquadFilter();
+    windFilter.type = "lowpass";
+    windFilter.frequency.value = 350;
+
+    windGain = audioContext.createGain();
+    windGain.gain.value = 0;
+
+    windSource.connect(windFilter);
+    windFilter.connect(windGain);
+    windGain.connect(masterGain);
+
+    windSource.start();
+
+    audioReady = true;
+
+    updateWeatherAudio(currentWeather);
+}
+
+/* =========================================
+   ADJUST SOUND TO CURRENT WEATHER
+========================================= */
+
+function updateWeatherAudio(type) {
+
+    if (!audioReady) return;
+
+    let rain = 0;
+    let wind = 0;
+
+    switch (type) {
+
+        case "drizzle":
+            rain = 0.12;
+            break;
+
+        case "rain":
+            rain = 0.35;
+            wind = 0.05;
+            break;
+
+        case "heavy_rain":
+            rain = 0.7;
+            wind = 0.15;
+            break;
+
+        case "storm":
+            rain = 0.9;
+            wind = 0.4;
+            break;
+
+        case "snow":
+            wind = 0.07;
+            break;
+
+        case "blizzard":
+            wind = 0.75;
+            break;
+
+        case "fog":
+            wind = 0.04;
+            break;
+    }
+
+    const now = audioContext.currentTime;
+
+    // Smoothly transition between sounds
+    rainGain.gain.setTargetAtTime(
+        rain, now, 2
+    );
+
+    windGain.gain.setTargetAtTime(
+        wind, now, 2
+    );
+}
+
+/* =========================================
+   THUNDER SOUND
+========================================= */
+
+function playThunder() {
+
+    if (!audioReady) return;
+
+    const context = audioContext;
+
+    const buffer = createNoiseBuffer(context);
+
+    const source = context.createBufferSource();
+    source.buffer = buffer;
+
+    const filter = context.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 130;
+
+    const gain = context.createGain();
+
+    const now = context.currentTime;
+
+    // Thunder starts loudly and fades away
+    gain.gain.setValueAtTime(0.001, now);
+
+    gain.gain.exponentialRampToValueAtTime(
+        thunderVolume, now + 0.15
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.001, now + 3.5
+    );
+
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+
+    source.start(now);
+    source.stop(now + 3.6);
+}
+
+/* =========================================
+   START AUDIO ON USER INTERACTION
+========================================= */
+
+// TV browsers usually require user interaction
+// before allowing sound playback.
+
+document.addEventListener(
+    "click",
+    initializeWeatherAudio
+);
+
+document.addEventListener(
+    "keydown",
+    initializeWeatherAudio
+);
 
 /* =========================================
    INITIALIZE
