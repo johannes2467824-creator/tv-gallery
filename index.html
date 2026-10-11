@@ -1132,6 +1132,49 @@ if (ctx) {
 
 startGreeting();
 
+/* =====================================
+   SAMSUNG TV WAKE-UP DETECTOR
+===================================== */
+
+var lastHeartbeat = Date.now();
+var lastWakeReload = 0;
+
+// Check whether the browser was suspended while TV was off.
+setInterval(function() {
+
+    var now = Date.now();
+    var elapsed = now - lastHeartbeat;
+
+    lastHeartbeat = now;
+
+    // If more than 30 seconds passed between checks,
+    // the browser was probably suspended.
+    if (elapsed > 30000 && now - lastWakeReload > 60000) {
+
+        lastWakeReload = now;
+
+        // Reload website to restart greeting and weather.
+        window.location.reload();
+    }
+
+}, 5000);
+
+// Also detect if Samsung reports the page becoming visible.
+document.addEventListener("visibilitychange", function() {
+
+    if (!document.hidden) {
+
+        var now = Date.now();
+
+        if (now - lastWakeReload > 60000) {
+
+            lastWakeReload = now;
+
+            window.location.reload();
+        }
+    }
+});
+
 </script>
 
 </body>
