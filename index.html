@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,7 +20,7 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #000;
+    background: black;
     font-family: Arial, sans-serif;
 }
 
@@ -27,7 +28,8 @@ html, body {
 
 .slide {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     background-size: cover;
@@ -41,11 +43,14 @@ html, body {
     opacity: 1;
 }
 
-/* WEATHER LAYER - HIDDEN DURING GREETING */
+/* WEATHER */
 
 #weatherLayer {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     z-index: 3;
     opacity: 0;
     visibility: hidden;
@@ -60,14 +65,20 @@ html, body {
 
 #overlay {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0,0,0,0.18);
     transition: background 3s ease;
 }
 
 #sunGlow {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: radial-gradient(
         circle at 80% 0%,
         rgba(255,195,75,0.35),
@@ -100,28 +111,35 @@ html, body {
 
 #weatherCanvas {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
 }
 
 #lightning {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: white;
     opacity: 0;
     pointer-events: none;
 }
 
-/* GREETING */
+/* WELCOME GREETING */
 
 #greetingScreen {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     z-index: 30;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     text-align: center;
     pointer-events: none;
 }
@@ -130,17 +148,13 @@ html, body {
     padding: 0 25px;
     color: white;
     font-family: 'Great Vibes', cursive;
-    font-size: clamp(65px, 10vw, 155px);
+    font-size: clamp(65px,10vw,155px);
     font-weight: normal;
     line-height: 1.4;
     text-shadow: 0 5px 30px rgba(0,0,0,0.95);
-
     opacity: 0;
     transform: translateY(15px);
-
-    transition:
-        opacity 2s ease,
-        transform 2s ease;
+    transition: opacity 2s ease, transform 2s ease;
 }
 
 #greetingText.show {
@@ -148,11 +162,14 @@ html, body {
     transform: translateY(0);
 }
 
-/* CLOCK AND DATE */
+/* CLOCK AND INFORMATION */
 
 #mainInterface {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     z-index: 20;
     opacity: 0;
     visibility: hidden;
@@ -217,8 +234,6 @@ html, body {
     letter-spacing: 5px;
 }
 
-/* ERROR DISPLAY */
-
 #errorMessage {
     position: absolute;
     top: 12px;
@@ -233,12 +248,8 @@ html, body {
 
 <body>
 
-<!-- PHOTOS -->
-
 <div id="slide1" class="slide active"></div>
 <div id="slide2" class="slide"></div>
-
-<!-- WEATHER -->
 
 <div id="weatherLayer">
     <div id="overlay"></div>
@@ -248,13 +259,9 @@ html, body {
     <div id="lightning"></div>
 </div>
 
-<!-- WELCOME SCREEN -->
-
 <div id="greetingScreen">
     <div id="greetingText"></div>
 </div>
-
-<!-- MAIN INTERFACE -->
 
 <div id="mainInterface">
     <div id="clockContainer">
@@ -270,7 +277,7 @@ html, body {
 <div id="errorMessage"></div>
 
 
-<!-- CLOCK: SEPARATE SCRIPT FOR RELIABILITY -->
+<!-- CLOCK SCRIPT -->
 
 <script>
 window.onerror = function(message, source, line) {
@@ -330,28 +337,37 @@ var photos = [
 var slideDuration = 15000;
 var shuffle = false;
 
+/* VALLENTUNA */
+
 var LATITUDE = 59.5344;
 var LONGITUDE = 18.0776;
 
 var weatherRefresh = 600000;
 
-/* LIVE WEATHER ENABLED */
+/* REAL WEATHER */
 
 var TEST_MODE = false;
 var TEST_WEATHER = "storm";
 
-/* SOUND */
+/* WEATHER SOUNDS */
 
 var enableWeatherSounds = true;
 var weatherVolume = 0.35;
 var thunderVolume = 0.70;
 
-/* GREETING TIMINGS (MILLISECONDS) */
+/* GREETING */
 
 var greetingFadeInDelay = 700;
 var greetingVisibleDuration = 4000;
 var greetingFadeOutDuration = 2000;
 var mainFadeDelay = 500;
+
+/* WAKE-UP DETECTION */
+
+/* A long browser suspension may indicate TV standby.
+   Short app switches will not trigger a reload. */
+
+var wakeThreshold = 60000;
 
 
 /* =====================================
@@ -409,7 +425,7 @@ if (photos.length > 1) {
 
 
 /* =====================================
-   PERSONALISED GREETING
+   WELCOME GREETING
 ===================================== */
 
 var greetingFinished = false;
@@ -433,19 +449,13 @@ function startGreeting() {
 
     greeting.textContent = getGreeting();
 
-    /* Fade greeting in */
-
     setTimeout(function() {
         greeting.classList.add("show");
     }, greetingFadeInDelay);
 
-    /* Fade greeting out */
-
     setTimeout(function() {
         greeting.classList.remove("show");
     }, greetingFadeInDelay + greetingVisibleDuration);
-
-    /* Reveal clock and weather */
 
     setTimeout(function() {
         greetingFinished = true;
@@ -463,9 +473,6 @@ function startGreeting() {
 
         createParticles();
         startLightning();
-
-        /* Weather sounds fade in if audio was unlocked */
-
         updateWeatherAudio(currentWeather);
 
     },
@@ -625,7 +632,7 @@ function setWeather(type, temperature) {
 function animateWeather() {
     ctx.clearRect(0, 0, width, height);
 
-    if (!greetingFinished) {
+    if (!greetingFinished || galleryInBackground) {
         requestAnimationFrame(animateWeather);
         return;
     }
@@ -722,7 +729,11 @@ function animateWeather() {
 ===================================== */
 
 function lightningFlash() {
-    if (!greetingFinished || currentWeather !== "storm") {
+    if (
+        !greetingFinished ||
+        galleryInBackground ||
+        currentWeather !== "storm"
+    ) {
         return;
     }
 
@@ -738,7 +749,10 @@ function lightningFlash() {
 
     if (Math.random() > 0.45) {
         setTimeout(function() {
-            if (currentWeather !== "storm") return;
+            if (
+                currentWeather !== "storm" ||
+                galleryInBackground
+            ) return;
 
             element.style.opacity = "0.9";
 
@@ -750,7 +764,11 @@ function lightningFlash() {
 }
 
 function scheduleLightning() {
-    if (!greetingFinished || currentWeather !== "storm") {
+    if (
+        !greetingFinished ||
+        galleryInBackground ||
+        currentWeather !== "storm"
+    ) {
         return;
     }
 
@@ -767,7 +785,11 @@ function startLightning() {
 
     document.getElementById("lightning").style.opacity = "0";
 
-    if (greetingFinished && currentWeather === "storm") {
+    if (
+        greetingFinished &&
+        !galleryInBackground &&
+        currentWeather === "storm"
+    ) {
         lightningTimer = setTimeout(
             scheduleLightning,
             2000 + Math.random() * 4000
@@ -777,7 +799,7 @@ function startLightning() {
 
 
 /* =====================================
-   WEATHER AUDIO - NO VISIBLE BUTTON
+   WEATHER AUDIO
 ===================================== */
 
 var audioContext = null;
@@ -787,6 +809,7 @@ var windGain = null;
 var noiseBuffer = null;
 
 var audioReady = false;
+var galleryInBackground = false;
 
 function createNoiseBuffer(context) {
     var length = context.sampleRate * 4;
@@ -805,12 +828,10 @@ function createNoiseBuffer(context) {
 }
 
 function initializeWeatherAudio() {
-    if (!enableWeatherSounds) return;
+    if (!enableWeatherSounds || galleryInBackground) return;
 
     if (audioReady) {
-        if (audioContext.state === "suspended") {
-            audioContext.resume();
-        }
+        resumeGalleryAudio();
         return;
     }
 
@@ -886,7 +907,7 @@ function updateWeatherAudio(type) {
     var rain = 0;
     var wind = 0;
 
-    if (greetingFinished) {
+    if (greetingFinished && !galleryInBackground) {
         switch (type) {
             case "drizzle":
                 rain = 0.12;
@@ -928,7 +949,11 @@ function updateWeatherAudio(type) {
 }
 
 function playThunder() {
-    if (!audioReady || !greetingFinished) return;
+    if (
+        !audioReady ||
+        !greetingFinished ||
+        galleryInBackground
+    ) return;
 
     var source = audioContext.createBufferSource();
     source.buffer = noiseBuffer;
@@ -960,7 +985,87 @@ function playThunder() {
 
 
 /* =====================================
-   LIVE WEATHER - VALLENTUNA
+   BACKGROUND AUDIO PROTECTION
+===================================== */
+
+function pauseGalleryAudio() {
+    galleryInBackground = true;
+
+    clearTimeout(lightningTimer);
+
+    document.getElementById("lightning").style.opacity = "0";
+
+    if (!audioReady || !audioContext) return;
+
+    try {
+        var now = audioContext.currentTime;
+
+        masterGain.gain.cancelScheduledValues(now);
+        masterGain.gain.setValueAtTime(0, now);
+
+        if (audioContext.state === "running") {
+            audioContext.suspend();
+        }
+    } catch (error) {}
+}
+
+function resumeGalleryAudio() {
+    if (document.hidden || galleryInBackground) return;
+
+    if (!audioReady || !audioContext) return;
+
+    try {
+        var now = audioContext.currentTime;
+
+        masterGain.gain.cancelScheduledValues(now);
+        masterGain.gain.setValueAtTime(weatherVolume, now);
+
+        if (audioContext.state === "suspended") {
+            audioContext.resume();
+        }
+
+        updateWeatherAudio(currentWeather);
+
+    } catch (error) {}
+}
+
+function galleryBecameVisible() {
+    galleryInBackground = false;
+
+    updateClock();
+    startLightning();
+    resumeGalleryAudio();
+}
+
+/* Stop sound when Samsung switches apps */
+
+document.addEventListener("visibilitychange", function() {
+    if (document.hidden) {
+        pauseGalleryAudio();
+    } else {
+        galleryBecameVisible();
+    }
+});
+
+window.addEventListener("pagehide", pauseGalleryAudio);
+
+window.addEventListener("pageshow", function() {
+    if (!document.hidden) {
+        galleryBecameVisible();
+    }
+});
+
+window.addEventListener("blur", pauseGalleryAudio);
+
+window.addEventListener("focus", function() {
+    if (!document.hidden) {
+        galleryBecameVisible();
+    }
+});
+
+
+/* =====================================
+   LIVE VALLENTUNA WEATHER
 ===================================== */
 
 function fetchWeather() {
@@ -1071,7 +1176,7 @@ function fetchWeather() {
 
 
 /* =====================================
-   FULLSCREEN + AUDIO ACTIVATION
+   FULLSCREEN
 ===================================== */
 
 function enterFullscreen() {
@@ -1081,9 +1186,7 @@ function enterFullscreen() {
         if (
             document.fullscreenElement ||
             document.webkitFullscreenElement
-        ) {
-            return;
-        }
+        ) return;
 
         if (page.requestFullscreen) {
             var result = page.requestFullscreen();
@@ -1101,10 +1204,12 @@ function enterFullscreen() {
 
 function activateExperience() {
     enterFullscreen();
-    initializeWeatherAudio();
-}
 
-/* No buttons required */
+    if (!document.hidden) {
+        galleryInBackground = false;
+        initializeWeatherAudio();
+    }
+}
 
 document.addEventListener("click", activateExperience);
 document.addEventListener("keydown", activateExperience);
@@ -1112,13 +1217,47 @@ document.addEventListener("touchstart", activateExperience);
 
 
 /* =====================================
+   TV WAKE-UP DETECTOR
+===================================== */
+
+var lastHeartbeat = Date.now();
+var lastWakeReload = Date.now();
+
+function checkForWakeUp() {
+    var now = Date.now();
+    var elapsed = now - lastHeartbeat;
+
+    lastHeartbeat = now;
+
+    /*
+       If the browser was suspended for over 60 seconds,
+       it may have been paused while the TV was in standby.
+
+       Reload only when the page is visible.
+    */
+
+    if (
+        elapsed > wakeThreshold &&
+        !document.hidden &&
+        !galleryInBackground &&
+        now - lastWakeReload > wakeThreshold
+    ) {
+        lastWakeReload = now;
+
+        pauseGalleryAudio();
+
+        window.location.reload();
+    }
+}
+
+setInterval(checkForWakeUp, 5000);
+
+
+/* =====================================
    INITIALISE
 ===================================== */
 
 resizeCanvas();
-
-/* Weather fetch begins in background,
-   but nothing is displayed during greeting. */
 
 fetchWeather();
 
@@ -1128,52 +1267,7 @@ if (ctx) {
     animateWeather();
 }
 
-/* Start welcome animation */
-
 startGreeting();
-
-/* =====================================
-   SAMSUNG TV WAKE-UP DETECTOR
-===================================== */
-
-var lastHeartbeat = Date.now();
-var lastWakeReload = 0;
-
-// Check whether the browser was suspended while TV was off.
-setInterval(function() {
-
-    var now = Date.now();
-    var elapsed = now - lastHeartbeat;
-
-    lastHeartbeat = now;
-
-    // If more than 30 seconds passed between checks,
-    // the browser was probably suspended.
-    if (elapsed > 30000 && now - lastWakeReload > 60000) {
-
-        lastWakeReload = now;
-
-        // Reload website to restart greeting and weather.
-        window.location.reload();
-    }
-
-}, 5000);
-
-// Also detect if Samsung reports the page becoming visible.
-document.addEventListener("visibilitychange", function() {
-
-    if (!document.hidden) {
-
-        var now = Date.now();
-
-        if (now - lastWakeReload > 60000) {
-
-            lastWakeReload = now;
-
-            window.location.reload();
-        }
-    }
-});
 
 </script>
 
