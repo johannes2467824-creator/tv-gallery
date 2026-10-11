@@ -1,17 +1,15 @@
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>My TV Gallery</title>
+<title>Vallentuna Ambient TV</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
-
 * {
     margin: 0;
     padding: 0;
@@ -22,154 +20,196 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: black;
+    background: #000;
+    font-family: Arial, sans-serif;
 }
 
-/* PHOTOS */
+/* BACKGROUND PHOTOS */
 
 .slide {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-
     opacity: 0;
-    transition: opacity 2s ease-in-out;
+    transition: opacity 2s ease;
 }
 
 .slide.active {
     opacity: 1;
 }
 
-/* DARK OVERLAY */
+/* DARKNESS */
 
-.overlay {
+#overlay {
     position: absolute;
     inset: 0;
+    z-index: 3;
     background: rgba(0,0,0,0.25);
+    pointer-events: none;
+    transition: background 3s;
+}
+
+/* WEATHER CANVAS */
+
+#weatherCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     z-index: 5;
     pointer-events: none;
 }
 
-/* ANIMATED RAIN */
+/* LIGHTNING */
 
-#rainCanvas {
+#lightning {
     position: absolute;
     inset: 0;
-
-    width: 100%;
-    height: 100%;
-
-    z-index: 6;
+    z-index: 8;
+    background: white;
+    opacity: 0;
     pointer-events: none;
+}
+
+/* SUNNY GLOW */
+
+#sunGlow {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+
+    background: radial-gradient(
+        circle at 80% 0%,
+        rgba(255,195,75,0.35),
+        transparent 65%
+    );
+
+    opacity: 0;
+    transition: opacity 3s;
+}
+
+/* FOG */
+
+#fog {
+    position: absolute;
+    inset: -20%;
+    z-index: 4;
+    pointer-events: none;
+
+    background: radial-gradient(
+        ellipse,
+        rgba(205,215,225,0.30),
+        transparent 75%
+    );
+
+    opacity: 0;
+    animation: fogMove 20s ease-in-out infinite alternate;
+}
+
+@keyframes fogMove {
+    from { transform: translateX(-8%); }
+    to { transform: translateX(8%); }
 }
 
 /* CLOCK */
 
 #clockContainer {
     position: absolute;
-
     top: 50%;
     left: 50%;
+    transform: translate(-50%,-50%);
 
-    transform: translate(-50%, -50%);
+    width: 95%;
+    z-index: 20;
 
-    width: 90%;
-    text-align: center;
     color: white;
-
-    z-index: 10;
+    text-align: center;
     pointer-events: none;
 
-    text-shadow: 0 4px 25px rgba(0,0,0,0.8);
+    text-shadow: 0 4px 25px rgba(0,0,0,0.9);
 }
-
-/* CURSIVE TIME */
 
 #fancyClock {
     font-family: 'Great Vibes', cursive;
-    font-size: clamp(100px, 15vw, 220px);
+    font-size: clamp(95px,15vw,220px);
     font-weight: normal;
     line-height: 1.3;
 }
 
-/* DIVIDER */
-
 .clockDivider {
     width: 100px;
     height: 1px;
-    background: rgba(255,255,255,0.85);
-    margin: 0 auto 25px auto;
+    margin: 0 auto 25px;
+    background: rgba(255,255,255,0.8);
 }
 
-/* DATE */
-
 #currentDate {
-    font-family: 'Montserrat', sans-serif;
-    font-size: clamp(15px, 2vw, 27px);
+    font-family: Montserrat, Arial, sans-serif;
+    font-size: clamp(15px,2vw,27px);
     font-weight: 300;
     letter-spacing: 4px;
     text-transform: uppercase;
 }
 
-/* BOTTOM LABEL */
+/* WEATHER INFORMATION */
+
+#weatherInfo {
+    margin-top: 25px;
+    font-family: Montserrat, Arial, sans-serif;
+    font-size: clamp(13px,1.3vw,19px);
+    font-weight: 300;
+    letter-spacing: 3px;
+}
 
 #bottomLabel {
     position: absolute;
-    bottom: 30px;
-    left: 50%;
+    bottom: 25px;
+    width: 100%;
+    text-align: center;
+    z-index: 20;
 
-    transform: translateX(-50%);
-
-    font-family: 'Montserrat', sans-serif;
+    color: rgba(255,255,255,0.65);
+    font-family: Montserrat, Arial, sans-serif;
     font-size: 11px;
     letter-spacing: 5px;
-    color: rgba(255,255,255,0.65);
-
-    z-index: 10;
+    pointer-events: none;
 }
-
 </style>
 </head>
 
 <body>
 
-<!-- PHOTO SLIDESHOW -->
-
+<!-- PHOTOS -->
 <div id="slide1" class="slide active"></div>
 <div id="slide2" class="slide"></div>
 
-<!-- DARK OVERLAY -->
-
-<div class="overlay"></div>
-
-<!-- RAIN EFFECT -->
-
-<canvas id="rainCanvas"></canvas>
+<!-- WEATHER LAYERS -->
+<div id="overlay"></div>
+<div id="sunGlow"></div>
+<div id="fog"></div>
+<canvas id="weatherCanvas"></canvas>
+<div id="lightning"></div>
 
 <!-- CLOCK -->
-
 <div id="clockContainer">
-
     <div id="fancyClock">00:00</div>
-
     <div class="clockDivider"></div>
-
     <div id="currentDate">Loading...</div>
-
+    <div id="weatherInfo">VALLENTUNA</div>
 </div>
 
 <div id="bottomLabel">HOME</div>
 
 <script>
 
-/* ==================================
+/* =========================================
    YOUR PHOTOS
-================================== */
+========================================= */
 
 const photos = [
     "photos/photo1.jpg",
@@ -177,34 +217,60 @@ const photos = [
     "photos/photo3.jpg"
 ];
 
-/* ==================================
+/* =========================================
    SETTINGS
-================================== */
+========================================= */
 
+// Slideshow interval
 const slideDuration = 15000;
+
+// Randomize photo order
 const shuffle = false;
+
+// Show clock
 const showClock = true;
-const overlayStrength = 0.25;
 
-// RAIN SETTINGS
+// Show weather text
+const showWeatherInfo = true;
 
-const enableRain = true;
+// Weather refresh interval (10 minutes)
+const weatherRefresh = 600000;
 
-// Number of raindrops
-const rainAmount = 130;
 
-// Falling speed multiplier
-const rainSpeed = 1.0;
+/* =========================================
+   WEATHER TEST MODE
 
-// Rain transparency
-const rainOpacity = 0.45;
+   Set true to override real weather.
+========================================= */
 
-// Wind direction
-const wind = -0.6;
+const TEST_MODE = false;
 
-/* ==================================
+// OPTIONS:
+// clear
+// sunny
+// cloudy
+// fog
+// drizzle
+// rain
+// heavy_rain
+// storm
+// snow
+// blizzard
+
+const TEST_WEATHER = "storm";
+
+
+/* =========================================
+   VALLENTUNA COORDINATES
+========================================= */
+
+const LATITUDE = 59.5344;
+const LONGITUDE = 18.0776;
+
+
+/* =========================================
    PHOTO SLIDESHOW
-================================== */
+========================================= */
 
 let photoIndex = 0;
 let activeSlide = 0;
@@ -229,24 +295,21 @@ function nextPhoto() {
 
     photoIndex = (photoIndex + 1) % photos.length;
 
-    const nextSlide = 1 - activeSlide;
-
+    const next = 1 - activeSlide;
     const image = new Image();
 
     image.onload = function() {
-
-        slides[nextSlide].style.backgroundImage =
+        slides[next].style.backgroundImage =
             `url("${photos[photoIndex]}")`;
 
-        slides[nextSlide].classList.add("active");
-
+        slides[next].classList.add("active");
         slides[activeSlide].classList.remove("active");
 
-        activeSlide = nextSlide;
+        activeSlide = next;
     };
 
     image.onerror = function() {
-        console.warn("Could not load photo:", image.src);
+        console.warn("Photo could not load:", image.src);
     };
 
     image.src = photos[photoIndex];
@@ -256,30 +319,31 @@ if (photos.length > 1) {
     setInterval(nextPhoto, slideDuration);
 }
 
-/* ==================================
+
+/* =========================================
    CLOCK AND DATE
-================================== */
+========================================= */
 
 function updateClock() {
 
     const now = new Date();
 
-    const time = now.toLocaleTimeString("sv-SE", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false
-    });
+    document.getElementById("fancyClock").textContent =
+        now.toLocaleTimeString("sv-SE", {
+            timeZone: "Europe/Stockholm",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+        });
 
-    const date = now.toLocaleDateString("en-GB", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric"
-    });
-
-    document.getElementById("fancyClock").textContent = time;
-
-    document.getElementById("currentDate").textContent = date;
+    document.getElementById("currentDate").textContent =
+        now.toLocaleDateString("en-GB", {
+            timeZone: "Europe/Stockholm",
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+        });
 }
 
 if (showClock) {
@@ -289,123 +353,553 @@ if (showClock) {
     document.getElementById("clockContainer").style.display = "none";
 }
 
-/* ==================================
-   OVERLAY
-================================== */
+if (!showWeatherInfo) {
+    document.getElementById("weatherInfo").style.display = "none";
+}
 
-document.querySelector(".overlay").style.background =
-    `rgba(0,0,0,${overlayStrength})`;
 
-/* ==================================
-   ANIMATED RAIN ENGINE
-================================== */
+/* =========================================
+   WEATHER ENGINE
+========================================= */
 
-const canvas = document.getElementById("rainCanvas");
+const canvas = document.getElementById("weatherCanvas");
 const ctx = canvas.getContext("2d");
 
-let drops = [];
-let width;
-let height;
+let width = 0;
+let height = 0;
 
-function resizeRain() {
+let particles = [];
+let currentWeather = "clear";
+let lightningTimer = 0;
+
+const weatherInfo = document.getElementById("weatherInfo");
+
+const weatherSettings = {
+
+    clear: {
+        count: 0,
+        darkness: 0.18,
+        speed: 0,
+        label: "CLEAR SKY"
+    },
+
+    sunny: {
+        count: 35,
+        darkness: 0.08,
+        speed: 0.3,
+        label: "SUNNY"
+    },
+
+    cloudy: {
+        count: 0,
+        darkness: 0.32,
+        speed: 0,
+        label: "CLOUDY"
+    },
+
+    fog: {
+        count: 0,
+        darkness: 0.28,
+        speed: 0,
+        label: "FOGGY"
+    },
+
+    drizzle: {
+        count: 65,
+        darkness: 0.30,
+        speed: 3,
+        label: "LIGHT RAIN"
+    },
+
+    rain: {
+        count: 160,
+        darkness: 0.35,
+        speed: 7,
+        label: "RAINING"
+    },
+
+    heavy_rain: {
+        count: 420,
+        darkness: 0.48,
+        speed: 15,
+        label: "HEAVY RAIN"
+    },
+
+    storm: {
+        count: 650,
+        darkness: 0.65,
+        speed: 21,
+        label: "THUNDERSTORM"
+    },
+
+    snow: {
+        count: 110,
+        darkness: 0.22,
+        speed: 1.4,
+        label: "SNOWING"
+    },
+
+    blizzard: {
+        count: 450,
+        darkness: 0.40,
+        speed: 6,
+        label: "SNOWSTORM"
+    }
+
+};
+
+
+/* =========================================
+   CANVAS SIZE
+========================================= */
+
+function resizeCanvas() {
 
     width = window.innerWidth;
     height = window.innerHeight;
 
-    // Limit rendering resolution for TV performance
-    const scale = Math.min(window.devicePixelRatio || 1, 1.5);
+    // Keep rendering lightweight on Samsung TV
+    const scale = Math.min(
+        window.devicePixelRatio || 1,
+        1.25
+    );
 
-    canvas.width = width * scale;
-    canvas.height = height * scale;
+    canvas.width = Math.round(width * scale);
+    canvas.height = Math.round(height * scale);
 
-    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    ctx.setTransform(scale,0,0,scale,0,0);
 
-    createRain();
+    createParticles();
 }
 
-function createDrop(randomY = false) {
+window.addEventListener("resize", resizeCanvas);
+
+
+/* =========================================
+   PARTICLES
+========================================= */
+
+function createParticle(randomY = false) {
+
+    const snow =
+        currentWeather === "snow" ||
+        currentWeather === "blizzard";
+
+    const sunny = currentWeather === "sunny";
 
     return {
         x: Math.random() * width,
-        y: randomY ? Math.random() * height : -30,
 
-        length: 8 + Math.random() * 22,
+        y: randomY
+            ? Math.random() * height
+            : -30,
 
-        speed: (3 + Math.random() * 7) * rainSpeed,
+        size: snow
+            ? 1.5 + Math.random() * 4
+            : sunny
+                ? 1 + Math.random() * 2
+                : 0.5 + Math.random() * 1.4,
 
-        thickness: 0.4 + Math.random() * 1.1,
+        length: 10 + Math.random() * 24,
 
-        opacity: (0.15 + Math.random() * 0.5) * rainOpacity
+        speed: 0.6 + Math.random() * 0.8,
+
+        drift: (Math.random() - 0.5) * 1.5,
+
+        opacity: 0.25 + Math.random() * 0.5,
+
+        phase: Math.random() * Math.PI * 2
     };
 }
 
-function createRain() {
+function createParticles() {
 
-    drops = [];
+    particles = [];
 
-    for (let i = 0; i < rainAmount; i++) {
-        drops.push(createDrop(true));
+    const settings = weatherSettings[currentWeather];
+
+    for (let i = 0; i < settings.count; i++) {
+        particles.push(createParticle(true));
     }
 }
 
-function animateRain() {
 
-    ctx.clearRect(0, 0, width, height);
+/* =========================================
+   APPLY WEATHER
+========================================= */
 
-    for (let i = 0; i < drops.length; i++) {
+function setWeather(type, temperature = null) {
 
-        let drop = drops[i];
+    if (!weatherSettings[type]) {
+        type = "clear";
+    }
+
+    currentWeather = type;
+
+    const settings = weatherSettings[type];
+
+    // Background darkness
+    document.getElementById("overlay").style.background =
+        `rgba(0,0,0,${settings.darkness})`;
+
+    // Sunlight
+    document.getElementById("sunGlow").style.opacity =
+        type === "sunny" ? "1" : "0";
+
+    // Fog
+    document.getElementById("fog").style.opacity =
+        type === "fog" ? "1" : "0";
+
+    // Weather label
+    let label = settings.label;
+
+    if (temperature !== null) {
+        label += "  ·  " + Math.round(temperature) + "°C";
+    }
+
+    weatherInfo.textContent = label + "  ·  VALLENTUNA";
+
+    // Reset lightning
+    lightningTimer = 0;
+    document.getElementById("lightning").style.opacity = 0;
+
+    createParticles();
+}
+
+
+/* =========================================
+   DRAW WEATHER
+========================================= */
+
+function animateWeather() {
+
+    ctx.clearRect(0,0,width,height);
+
+    const settings = weatherSettings[currentWeather];
+
+    const snow =
+        currentWeather === "snow" ||
+        currentWeather === "blizzard";
+
+    const sunny = currentWeather === "sunny";
+
+    const storm = currentWeather === "storm";
+
+    for (let i = 0; i < particles.length; i++) {
+
+        let p = particles[i];
 
         ctx.beginPath();
 
-        ctx.strokeStyle =
-            `rgba(210,230,255,${drop.opacity})`;
+        if (snow) {
 
-        ctx.lineWidth = drop.thickness;
+            // Snowflakes
+            ctx.fillStyle =
+                `rgba(255,255,255,${p.opacity})`;
 
-        ctx.moveTo(drop.x, drop.y);
+            ctx.arc(p.x,p.y,p.size,0,Math.PI * 2);
+            ctx.fill();
 
-        ctx.lineTo(
-            drop.x + wind * drop.length,
-            drop.y + drop.length
-        );
+            p.y += settings.speed * p.speed;
 
-        ctx.stroke();
+            p.x += p.drift +
+                Math.sin(p.y * 0.01 + p.phase) * 0.5;
 
-        // Move the raindrop
-        drop.y += drop.speed;
-        drop.x += wind * drop.speed;
+            if (currentWeather === "blizzard") {
+                p.x += 3;
+            }
 
-        // Reset after leaving the screen
+        } else if (sunny) {
+
+            // Floating golden particles
+            ctx.fillStyle =
+                `rgba(255,220,150,${p.opacity * 0.5})`;
+
+            ctx.arc(p.x,p.y,p.size,0,Math.PI * 2);
+            ctx.fill();
+
+            p.y -= 0.3;
+            p.x += Math.sin(p.y * 0.01 + p.phase) * 0.4;
+
+        } else {
+
+            // Rain
+            ctx.strokeStyle =
+                `rgba(205,225,255,${p.opacity})`;
+
+            ctx.lineWidth = p.size;
+
+            const wind = storm ? -0.7 : -0.25;
+
+            ctx.moveTo(p.x,p.y);
+
+            ctx.lineTo(
+                p.x + p.length * wind,
+                p.y + p.length
+            );
+
+            ctx.stroke();
+
+            p.y += settings.speed * p.speed;
+            p.x += settings.speed * wind * 0.35;
+        }
+
+        // Recycle particles
         if (
-            drop.y > height + 30 ||
-            drop.x < -40 ||
-            drop.x > width + 40
+            p.y > height + 40 ||
+            p.x < -60 ||
+            p.x > width + 60 ||
+            (sunny && p.y < -40)
         ) {
-            drops[i] = createDrop();
+
+            particles[i] = createParticle();
+
+            if (sunny) {
+                particles[i].y = height + 10;
+            }
+
+            if (currentWeather === "blizzard") {
+                particles[i].x = -20;
+                particles[i].y = Math.random() * height;
+            }
         }
     }
 
-    requestAnimationFrame(animateRain);
+    requestAnimationFrame(animateWeather);
 }
 
-if (enableRain && ctx) {
 
-    resizeRain();
+/* =========================================
+   LIGHTNING ENGINE
+========================================= */
 
-    window.addEventListener("resize", resizeRain);
+function lightningFlash() {
 
-    animateRain();
+    const element = document.getElementById("lightning");
 
-} else {
+    element.style.opacity = "0.65";
 
-    canvas.style.display = "none";
+    setTimeout(() => {
+        element.style.opacity = "0";
+    }, 90);
 
+    // Occasional double flash
+    if (Math.random() > 0.45) {
+
+        setTimeout(() => {
+
+            if (currentWeather !== "storm") return;
+
+            element.style.opacity = "0.9";
+
+            setTimeout(() => {
+                element.style.opacity = "0";
+            }, 110);
+
+        }, 180);
+    }
 }
 
-/* ==================================
-   FULLSCREEN REQUEST
-================================== */
+function scheduleLightning() {
+
+    if (currentWeather === "storm") {
+
+        lightningFlash();
+
+        // Next lightning strike
+        lightningTimer = setTimeout(
+            scheduleLightning,
+            3500 + Math.random() * 9000
+        );
+
+    } else {
+
+        lightningTimer = 0;
+
+    }
+}
+
+function startLightning() {
+
+    clearTimeout(lightningTimer);
+
+    lightningTimer = 0;
+
+    if (currentWeather === "storm") {
+
+        lightningTimer = setTimeout(
+            scheduleLightning,
+            2000 + Math.random() * 4000
+        );
+
+    }
+}
+
+
+/* =========================================
+   FETCH REAL VALLENTUNA WEATHER
+========================================= */
+
+async function fetchWeather() {
+
+    // Test mode overrides live weather
+    if (TEST_MODE) {
+
+        setWeather(TEST_WEATHER);
+        startLightning();
+
+        return;
+    }
+
+    const url =
+        "https://api.open-meteo.com/v1/forecast" +
+        "?latitude=" + LATITUDE +
+        "&longitude=" + LONGITUDE +
+        "&current=temperature_2m,precipitation,rain,snowfall,weather_code,wind_speed_10m,wind_gusts_10m" +
+        "&timezone=Europe%2FStockholm";
+
+    try {
+
+        const response = await fetch(url, {
+            cache: "no-store"
+        });
+
+        if (!response.ok) {
+            throw new Error("Weather API unavailable");
+        }
+
+        const data = await response.json();
+
+        const w = data.current;
+
+        const code = w.weather_code;
+        const rain = w.precipitation || 0;
+        const snowfall = w.snowfall || 0;
+        const wind = w.wind_speed_10m || 0;
+        const gusts = w.wind_gusts_10m || 0;
+
+        let type = "clear";
+
+        // Thunderstorm
+        if ([95,96,99].includes(code)) {
+
+            type = "storm";
+
+        }
+
+        // Snow
+        else if (
+            [71,73,75,77,85,86].includes(code) ||
+            snowfall > 0
+        ) {
+
+            type =
+                snowfall >= 1.5 ||
+                gusts >= 45 ||
+                wind >= 35 ||
+                [75,86].includes(code)
+                ? "blizzard"
+                : "snow";
+
+        }
+
+        // Rain and showers
+        else if (
+            [51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code) ||
+            rain > 0
+        ) {
+
+            if (
+                rain >= 7.5 ||
+                [65,67,82].includes(code)
+            ) {
+
+                type = "heavy_rain";
+
+            } else if (
+                rain < 0.5 ||
+                [51,53,56].includes(code)
+            ) {
+
+                type = "drizzle";
+
+            } else {
+
+                type = "rain";
+
+            }
+
+        }
+
+        // Fog
+        else if ([45,48].includes(code)) {
+
+            type = "fog";
+
+        }
+
+        // Cloudy
+        else if ([2,3].includes(code)) {
+
+            type = "cloudy";
+
+        }
+
+        // Clear / sunny
+        else if ([0,1].includes(code)) {
+
+            const hour = Number(
+                new Intl.DateTimeFormat("en-GB", {
+                    timeZone: "Europe/Stockholm",
+                    hour: "2-digit",
+                    hourCycle: "h23"
+                }).format(new Date())
+            );
+
+            type =
+                hour >= 7 && hour < 19
+                ? "sunny"
+                : "clear";
+
+        }
+
+        setWeather(type,w.temperature_2m);
+
+        startLightning();
+
+        console.log("Vallentuna weather:",type,w);
+
+    } catch (error) {
+
+        console.warn("Weather update failed:",error);
+
+        // Keep previous weather effect
+        if (weatherInfo.textContent === "VALLENTUNA") {
+            weatherInfo.textContent =
+                "WEATHER UNAVAILABLE · VALLENTUNA";
+        }
+
+    }
+}
+
+
+/* =========================================
+   INITIALIZE
+========================================= */
+
+resizeCanvas();
+
+animateWeather();
+
+fetchWeather();
+
+// Refresh weather every 10 minutes
+setInterval(fetchWeather,weatherRefresh);
+
+
+/* =========================================
+   FULLSCREEN
+========================================= */
 
 function enterFullscreen() {
 
@@ -426,10 +920,9 @@ function enterFullscreen() {
     }
 }
 
-document.addEventListener("click", enterFullscreen);
-document.addEventListener("keydown", enterFullscreen);
+document.addEventListener("click",enterFullscreen);
+document.addEventListener("keydown",enterFullscreen);
 
 </script>
-
 </body>
 </html>
