@@ -482,12 +482,6 @@ var greetingVisibleDuration = 4000;
 var greetingFadeOutDuration = 2000;
 var mainFadeDelay = 500;
 
-
-/* TV WAKE DETECTOR */
-
-var wakeThreshold = 60000;
-
-
 /* =====================================
    SLIDESHOW
 ===================================== */
@@ -1862,47 +1856,6 @@ document.addEventListener(
     "click",
     activateExperience
 );
-
-
-/* =====================================
-   TV WAKE-UP DETECTOR
-===================================== */
-
-var lastHeartbeat = Date.now();
-
-var lastWakeReload = Date.now();
-
-function checkForWakeUp() {
-
-    var now =
-        Date.now();
-
-    var elapsed =
-        now - lastHeartbeat;
-
-    lastHeartbeat = now;
-
-    if (
-        elapsed > wakeThreshold &&
-        !document.hidden &&
-        !galleryInBackground &&
-        now - lastWakeReload > wakeThreshold
-    ) {
-
-        lastWakeReload = now;
-
-        pauseGalleryAudio();
-
-        window.location.reload();
-
-    }
-}
-
-setInterval(
-    checkForWakeUp,
-    5000
-);
-
 
 /* =====================================
    INITIALISE
