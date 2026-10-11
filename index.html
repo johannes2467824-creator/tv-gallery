@@ -1126,32 +1126,51 @@ fetchWeather();
 setInterval(fetchWeather,weatherRefresh);
 
 
+
 /* =========================================
-   FULLSCREEN
+   AUTOMATIC FULLSCREEN
 ========================================= */
 
 function enterFullscreen() {
 
     const page = document.documentElement;
 
-    if (page.requestFullscreen) {
+    // Already fullscreen?
+    if (
+        document.fullscreenElement ||
+        document.webkitFullscreenElement
+    ) {
+        return;
+    }
 
-        const result = page.requestFullscreen();
+    try {
 
-        if (result && result.catch) {
-            result.catch(() => {});
+        if (page.requestFullscreen) {
+
+            const result = page.requestFullscreen();
+
+            if (result && result.catch) {
+                result.catch(() => {});
+            }
+
+        } else if (page.webkitRequestFullscreen) {
+
+            page.webkitRequestFullscreen();
+
         }
 
-    } else if (page.webkitRequestFullscreen) {
-
-        page.webkitRequestFullscreen();
-
+    } catch (error) {
+        console.log("Fullscreen unavailable");
     }
 }
 
-document.addEventListener("click",enterFullscreen);
-document.addEventListener("keydown",enterFullscreen);
+// Attempt fullscreen when website loads
+window.addEventListener("load", function() {
+    enterFullscreen();
+});
 
-</script>
-</body>
-</html>
+// Attempt again when user interacts
+document.addEventListener("click", enterFullscreen);
+document.addEventListener("keydown", enterFullscreen);
+document.addEventListener("touchstart", enterFullscreen);
+
