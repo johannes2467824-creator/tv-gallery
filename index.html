@@ -102,8 +102,19 @@ document.addEventListener("keydown", enterFullscreen);
 <div id="slide1" class="slide active"></div>
 <div id="slide2" class="slide"></div>
 
-<div id="clock"></div>
-<div id="rainbow">🌈</div>
+
+<!-- Elegant central clock -->
+
+<div id="clockContainer">
+
+    <div id="fancyClock">00:00</div>
+
+    <div class="clockDivider"></div>
+
+    <div id="currentDate">Loading date...</div>
+
+</div>
+
 <script>
 
 /* =========================
