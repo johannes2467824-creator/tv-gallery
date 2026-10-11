@@ -62,6 +62,20 @@ html, body {
 </head>
 
 <body>
+<script>
+function enterFullscreen() {
+    const page = document.documentElement;
+
+    if (page.requestFullscreen) {
+        page.requestFullscreen().catch(() => {});
+    } else if (page.webkitRequestFullscreen) {
+        page.webkitRequestFullscreen();
+    }
+}
+
+document.addEventListener("click", enterFullscreen);
+document.addEventListener("keydown", enterFullscreen);
+</script>
 
 <div id="slide1" class="slide active"></div>
 <div id="slide2" class="slide"></div>
