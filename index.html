@@ -7,9 +7,10 @@
 
 <title>Vallentuna Ambient TV</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
 
 <style>
+
 * {
     margin: 0;
     padding: 0;
@@ -20,20 +21,23 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #000;
+    background: black;
     font-family: Arial, sans-serif;
 }
 
-/* BACKGROUND PHOTOS */
+/* PHOTOS */
 
 .slide {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
+
     opacity: 0;
     transition: opacity 2s ease;
 }
@@ -42,13 +46,17 @@ html, body {
     opacity: 1;
 }
 
-/* DARKNESS */
+/* WEATHER OVERLAY */
 
 #overlay {
     position: absolute;
-    inset: 0;
-    z-index: 3;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
     background: rgba(0,0,0,0.25);
+    z-index: 3;
     pointer-events: none;
     transition: background 3s;
 }
@@ -57,29 +65,24 @@ html, body {
 
 #weatherCanvas {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+
     z-index: 5;
     pointer-events: none;
 }
 
-/* LIGHTNING */
-
-#lightning {
-    position: absolute;
-    inset: 0;
-    z-index: 8;
-    background: white;
-    opacity: 0;
-    pointer-events: none;
-}
-
-/* SUNNY GLOW */
+/* SUN */
 
 #sunGlow {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
     z-index: 4;
     pointer-events: none;
 
@@ -97,7 +100,11 @@ html, body {
 
 #fog {
     position: absolute;
-    inset: -20%;
+    top: -20%;
+    left: -20%;
+    width: 140%;
+    height: 140%;
+
     z-index: 4;
     pointer-events: none;
 
@@ -116,6 +123,21 @@ html, body {
     to { transform: translateX(8%); }
 }
 
+/* LIGHTNING */
+
+#lightning {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    background: white;
+    opacity: 0;
+    z-index: 8;
+    pointer-events: none;
+}
+
 /* CLOCK */
 
 #clockContainer {
@@ -125,10 +147,10 @@ html, body {
     transform: translate(-50%,-50%);
 
     width: 95%;
-    z-index: 20;
-
-    color: white;
     text-align: center;
+    color: white;
+
+    z-index: 20;
     pointer-events: none;
 
     text-shadow: 0 4px 25px rgba(0,0,0,0.9);
@@ -149,18 +171,16 @@ html, body {
 }
 
 #currentDate {
-    font-family: Montserrat, Arial, sans-serif;
+    font-family: 'Montserrat', Arial, sans-serif;
     font-size: clamp(15px,2vw,27px);
     font-weight: 300;
     letter-spacing: 4px;
     text-transform: uppercase;
 }
 
-/* WEATHER INFORMATION */
-
 #weatherInfo {
     margin-top: 25px;
-    font-family: Montserrat, Arial, sans-serif;
+    font-family: 'Montserrat', Arial, sans-serif;
     font-size: clamp(13px,1.3vw,19px);
     font-weight: 300;
     letter-spacing: 3px;
@@ -170,211 +190,251 @@ html, body {
     position: absolute;
     bottom: 25px;
     width: 100%;
-    text-align: center;
-    z-index: 20;
 
+    text-align: center;
     color: rgba(255,255,255,0.65);
-    font-family: Montserrat, Arial, sans-serif;
+
+    font-family: 'Montserrat', Arial, sans-serif;
     font-size: 11px;
     letter-spacing: 5px;
+
+    z-index: 20;
     pointer-events: none;
 }
+
+/* AUDIO ACTIVATION */
+
+#soundButton {
+    position: absolute;
+    bottom: 55px;
+    right: 25px;
+
+    z-index: 30;
+
+    padding: 12px 18px;
+
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 25px;
+
+    background: rgba(0,0,0,0.4);
+    color: white;
+
+    font-size: 13px;
+    cursor: pointer;
+}
+
+/* ERROR MESSAGE */
+
+#errorMessage {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+
+    z-index: 100;
+
+    color: #ffaaaa;
+    font-size: 14px;
+    font-family: monospace;
+}
+
 </style>
 </head>
 
 <body>
 
 <!-- PHOTOS -->
+
 <div id="slide1" class="slide active"></div>
 <div id="slide2" class="slide"></div>
 
-<!-- WEATHER LAYERS -->
+<!-- WEATHER -->
+
 <div id="overlay"></div>
 <div id="sunGlow"></div>
 <div id="fog"></div>
+
 <canvas id="weatherCanvas"></canvas>
+
 <div id="lightning"></div>
 
 <!-- CLOCK -->
+
 <div id="clockContainer">
+
     <div id="fancyClock">00:00</div>
+
     <div class="clockDivider"></div>
+
     <div id="currentDate">Loading...</div>
+
     <div id="weatherInfo">VALLENTUNA</div>
+
 </div>
 
 <div id="bottomLabel">HOME</div>
 
+<button id="soundButton" type="button">
+    Enable weather sounds
+</button>
+
+<div id="errorMessage"></div>
+
+
+<!-- CLOCK SCRIPT - RUNS FIRST -->
+
 <script>
 
-/* =========================================
-   YOUR PHOTOS
-========================================= */
+window.onerror = function(message, source, line) {
 
-const photos = [
+    document.getElementById("errorMessage").textContent =
+        "JavaScript error line " + line + ": " + message;
+
+    return false;
+};
+
+function updateClock() {
+
+    var now = new Date();
+
+    var hours = ("0" + now.getHours()).slice(-2);
+    var minutes = ("0" + now.getMinutes()).slice(-2);
+
+    var days = [
+        "Sunday", "Monday", "Tuesday",
+        "Wednesday", "Thursday", "Friday",
+        "Saturday"
+    ];
+
+    var months = [
+        "January", "February", "March",
+        "April", "May", "June",
+        "July", "August", "September",
+        "October", "November", "December"
+    ];
+
+    var date =
+        days[now.getDay()] + ", " +
+        now.getDate() + " " +
+        months[now.getMonth()] + " " +
+        now.getFullYear();
+
+    document.getElementById("fancyClock").textContent =
+        hours + ":" + minutes;
+
+    document.getElementById("currentDate").textContent = date;
+}
+
+updateClock();
+
+setInterval(updateClock,1000);
+
+</script>
+
+
+<!-- MAIN GALLERY SCRIPT -->
+
+<script>
+
+/* ==================================
+   SETTINGS
+================================== */
+
+var photos = [
     "photos/photo1.jpg",
     "photos/photo2.jpg",
     "photos/photo3.jpg"
 ];
 
-/* =========================================
-   SETTINGS
-========================================= */
+var slideDuration = 15000;
+var shuffle = false;
 
-// Slideshow interval
-const slideDuration = 15000;
+var weatherRefresh = 600000;
 
-// Randomize photo order
-const shuffle = false;
+// WEATHER TEST MODE
+// FALSE = REAL VALLENTUNA WEATHER
 
-// Show clock
-const showClock = true;
+var TEST_MODE = false;
 
-// Show weather text
-const showWeatherInfo = true;
+// Options:
+// clear, sunny, cloudy, fog, drizzle,
+// rain, heavy_rain, storm, snow, blizzard
 
-// Weather refresh interval (10 minutes)
-const weatherRefresh = 600000;
+var TEST_WEATHER = "storm";
 
+// SOUND SETTINGS
 
-/* =========================================
-   WEATHER TEST MODE
+var enableWeatherSounds = true;
 
-   Set true to override real weather.
-========================================= */
+var weatherVolume = 0.35;
+var thunderVolume = 0.70;
 
-const TEST_MODE = false;
+// VALLENTUNA
 
-// OPTIONS:
-// clear
-// sunny
-// cloudy
-// fog
-// drizzle
-// rain
-// heavy_rain
-// storm
-// snow
-// blizzard
-
-const TEST_WEATHER = "storm";
+var LATITUDE = 59.5344;
+var LONGITUDE = 18.0776;
 
 
-/* =========================================
-   VALLENTUNA COORDINATES
-========================================= */
+/* ==================================
+   SLIDESHOW
+================================== */
 
-const LATITUDE = 59.5344;
-const LONGITUDE = 18.0776;
+var photoIndex = 0;
+var activeSlide = 0;
 
-
-/* =========================================
-   PHOTO SLIDESHOW
-========================================= */
-
-let photoIndex = 0;
-let activeSlide = 0;
-
-const slides = [
+var slides = [
     document.getElementById("slide1"),
     document.getElementById("slide2")
 ];
 
 if (shuffle) {
-    photos.sort(() => Math.random() - 0.5);
+    photos.sort(function() {
+        return Math.random() - 0.5;
+    });
 }
 
-if (photos.length) {
+if (photos.length > 0) {
     slides[0].style.backgroundImage =
-        `url("${photos[0]}")`;
+        'url("' + photos[0] + '")';
 }
 
 function nextPhoto() {
 
     if (photos.length < 2) return;
 
-    photoIndex = (photoIndex + 1) % photos.length;
+    var nextIndex = (photoIndex + 1) % photos.length;
+    var nextSlide = 1 - activeSlide;
 
-    const next = 1 - activeSlide;
-    const image = new Image();
+    var image = new Image();
 
     image.onload = function() {
-        slides[next].style.backgroundImage =
-            `url("${photos[photoIndex]}")`;
 
-        slides[next].classList.add("active");
+        slides[nextSlide].style.backgroundImage =
+            'url("' + photos[nextIndex] + '")';
+
+        slides[nextSlide].classList.add("active");
         slides[activeSlide].classList.remove("active");
 
-        activeSlide = next;
+        activeSlide = nextSlide;
+        photoIndex = nextIndex;
     };
 
     image.onerror = function() {
-        console.warn("Photo could not load:", image.src);
+        photoIndex = nextIndex;
     };
 
-    image.src = photos[photoIndex];
+    image.src = photos[nextIndex];
 }
 
 if (photos.length > 1) {
-    setInterval(nextPhoto, slideDuration);
+    setInterval(nextPhoto,slideDuration);
 }
 
 
-/* =========================================
-   CLOCK AND DATE
-========================================= */
+/* ==================================
+   WEATHER SETTINGS
+================================== */
 
-function updateClock() {
-
-    const now = new Date();
-
-    document.getElementById("fancyClock").textContent =
-        now.toLocaleTimeString("sv-SE", {
-            timeZone: "Europe/Stockholm",
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false
-        });
-
-    document.getElementById("currentDate").textContent =
-        now.toLocaleDateString("en-GB", {
-            timeZone: "Europe/Stockholm",
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric"
-        });
-}
-
-if (showClock) {
-    updateClock();
-    setInterval(updateClock, 1000);
-} else {
-    document.getElementById("clockContainer").style.display = "none";
-}
-
-if (!showWeatherInfo) {
-    document.getElementById("weatherInfo").style.display = "none";
-}
-
-
-/* =========================================
-   WEATHER ENGINE
-========================================= */
-
-const canvas = document.getElementById("weatherCanvas");
-const ctx = canvas.getContext("2d");
-
-let width = 0;
-let height = 0;
-
-let particles = [];
-let currentWeather = "clear";
-let lightningTimer = 0;
-
-const weatherInfo = document.getElementById("weatherInfo");
-
-const weatherSettings = {
+var weatherSettings = {
 
     clear: {
         count: 0,
@@ -384,7 +444,7 @@ const weatherSettings = {
     },
 
     sunny: {
-        count: 35,
+        count: 25,
         darkness: 0.08,
         speed: 0.3,
         label: "SUNNY"
@@ -405,42 +465,42 @@ const weatherSettings = {
     },
 
     drizzle: {
-        count: 65,
+        count: 40,
         darkness: 0.30,
         speed: 3,
         label: "LIGHT RAIN"
     },
 
     rain: {
-        count: 160,
+        count: 70,
         darkness: 0.35,
         speed: 7,
         label: "RAINING"
     },
 
     heavy_rain: {
-        count: 420,
+        count: 120,
         darkness: 0.48,
         speed: 15,
         label: "HEAVY RAIN"
     },
 
     storm: {
-        count: 650,
+        count: 180,
         darkness: 0.65,
         speed: 21,
         label: "THUNDERSTORM"
     },
 
     snow: {
-        count: 110,
+        count: 70,
         darkness: 0.22,
         speed: 1.4,
         label: "SNOWING"
     },
 
     blizzard: {
-        count: 450,
+        count: 100,
         darkness: 0.40,
         speed: 6,
         label: "SNOWSTORM"
@@ -449,45 +509,32 @@ const weatherSettings = {
 };
 
 
-/* =========================================
-   CANVAS SIZE
-========================================= */
+/* ==================================
+   WEATHER ENGINE
+================================== */
 
-function resizeCanvas() {
+var canvas = document.getElementById("weatherCanvas");
+var ctx = canvas.getContext("2d");
 
-    width = window.innerWidth;
-    height = window.innerHeight;
+var width = 0;
+var height = 0;
 
-    // Keep rendering lightweight on Samsung TV
-    const scale = Math.min(
-        window.devicePixelRatio || 1,
-        1.25
-    );
+var particles = [];
+var currentWeather = "clear";
+var lightningTimer = null;
 
-    canvas.width = Math.round(width * scale);
-    canvas.height = Math.round(height * scale);
+var weatherInfo = document.getElementById("weatherInfo");
 
-    ctx.setTransform(scale,0,0,scale,0,0);
+function createParticle(randomY) {
 
-    createParticles();
-}
-
-window.addEventListener("resize", resizeCanvas);
-
-
-/* =========================================
-   PARTICLES
-========================================= */
-
-function createParticle(randomY = false) {
-
-    const snow =
+    var snow =
         currentWeather === "snow" ||
         currentWeather === "blizzard";
 
-    const sunny = currentWeather === "sunny";
+    var sunny = currentWeather === "sunny";
 
     return {
+
         x: Math.random() * width,
 
         y: randomY
@@ -509,6 +556,7 @@ function createParticle(randomY = false) {
         opacity: 0.25 + Math.random() * 0.5,
 
         phase: Math.random() * Math.PI * 2
+
     };
 }
 
@@ -516,87 +564,94 @@ function createParticles() {
 
     particles = [];
 
-    const settings = weatherSettings[currentWeather];
+    var settings = weatherSettings[currentWeather];
 
-    for (let i = 0; i < settings.count; i++) {
+    for (var i = 0; i < settings.count; i++) {
         particles.push(createParticle(true));
     }
 }
 
+function resizeCanvas() {
 
-/* =========================================
-   APPLY WEATHER
-========================================= */
+    width = window.innerWidth;
+    height = window.innerHeight;
 
-function setWeather(type, temperature = null) {
+    canvas.width = width;
+    canvas.height = height;
+
+    createParticles();
+}
+
+window.addEventListener("resize",resizeCanvas);
+
+
+/* ==================================
+   SET WEATHER
+================================== */
+
+function setWeather(type,temperature) {
 
     if (!weatherSettings[type]) {
         type = "clear";
     }
 
     currentWeather = type;
-    updateWeatherAudio(type);
 
-    const settings = weatherSettings[type];
+    var settings = weatherSettings[type];
 
-    // Background darkness
     document.getElementById("overlay").style.background =
-        `rgba(0,0,0,${settings.darkness})`;
+        "rgba(0,0,0," + settings.darkness + ")";
 
-    // Sunlight
     document.getElementById("sunGlow").style.opacity =
         type === "sunny" ? "1" : "0";
 
-    // Fog
     document.getElementById("fog").style.opacity =
         type === "fog" ? "1" : "0";
 
-    // Weather label
-    let label = settings.label;
+    var label = settings.label;
 
-    if (temperature !== null) {
+    if (typeof temperature === "number") {
         label += "  ·  " + Math.round(temperature) + "°C";
     }
 
     weatherInfo.textContent = label + "  ·  VALLENTUNA";
 
-    // Reset lightning
-    lightningTimer = 0;
-    document.getElementById("lightning").style.opacity = 0;
-
     createParticles();
+
+    updateWeatherAudio(type);
+
+    startLightning();
 }
 
 
-/* =========================================
+/* ==================================
    DRAW WEATHER
-========================================= */
+================================== */
 
 function animateWeather() {
 
     ctx.clearRect(0,0,width,height);
 
-    const settings = weatherSettings[currentWeather];
+    var settings = weatherSettings[currentWeather];
 
-    const snow =
+    var snow =
         currentWeather === "snow" ||
         currentWeather === "blizzard";
 
-    const sunny = currentWeather === "sunny";
+    var sunny = currentWeather === "sunny";
 
-    const storm = currentWeather === "storm";
+    var storm = currentWeather === "storm";
 
-    for (let i = 0; i < particles.length; i++) {
+    for (var i = 0; i < particles.length; i++) {
 
-        let p = particles[i];
+        var p = particles[i];
 
         ctx.beginPath();
 
         if (snow) {
 
-            // Snowflakes
             ctx.fillStyle =
-                `rgba(255,255,255,${p.opacity})`;
+                "rgba(255,255,255," + p.opacity + ")";
 
             ctx.arc(p.x,p.y,p.size,0,Math.PI * 2);
             ctx.fill();
@@ -612,9 +667,8 @@ function animateWeather() {
 
         } else if (sunny) {
 
-            // Floating golden particles
             ctx.fillStyle =
-                `rgba(255,220,150,${p.opacity * 0.5})`;
+                "rgba(255,220,150," + p.opacity * 0.5 + ")";
 
             ctx.arc(p.x,p.y,p.size,0,Math.PI * 2);
             ctx.fill();
@@ -624,13 +678,12 @@ function animateWeather() {
 
         } else {
 
-            // Rain
             ctx.strokeStyle =
-                `rgba(205,225,255,${p.opacity})`;
+                "rgba(205,225,255," + p.opacity + ")";
 
             ctx.lineWidth = p.size;
 
-            const wind = storm ? -0.7 : -0.25;
+            var wind = storm ? -0.7 : -0.25;
 
             ctx.moveTo(p.x,p.y);
 
@@ -645,7 +698,6 @@ function animateWeather() {
             p.x += settings.speed * wind * 0.35;
         }
 
-        // Recycle particles
         if (
             p.y > height + 40 ||
             p.x < -60 ||
@@ -653,7 +705,7 @@ function animateWeather() {
             (sunny && p.y < -40)
         ) {
 
-            particles[i] = createParticle();
+            particles[i] = createParticle(false);
 
             if (sunny) {
                 particles[i].y = height + 10;
@@ -670,61 +722,55 @@ function animateWeather() {
 }
 
 
-/* =========================================
-   LIGHTNING ENGINE
-========================================= */
+/* ==================================
+   LIGHTNING
+================================== */
 
 function lightningFlash() {
-playThunder();
-    const element = document.getElementById("lightning");
+
+    var element = document.getElementById("lightning");
 
     element.style.opacity = "0.65";
 
-    setTimeout(() => {
-        element.style.opacity = "0";
-    }, 90);
+    playThunder();
 
-    // Occasional double flash
+    setTimeout(function() {
+        element.style.opacity = "0";
+    },90);
+
     if (Math.random() > 0.45) {
 
-        setTimeout(() => {
+        setTimeout(function() {
 
             if (currentWeather !== "storm") return;
 
             element.style.opacity = "0.9";
 
-            setTimeout(() => {
+            setTimeout(function() {
                 element.style.opacity = "0";
-            }, 110);
+            },110);
 
-        }, 180);
+        },180);
     }
 }
 
 function scheduleLightning() {
 
-    if (currentWeather === "storm") {
+    if (currentWeather !== "storm") return;
 
-        lightningFlash();
+    lightningFlash();
 
-        // Next lightning strike
-        lightningTimer = setTimeout(
-            scheduleLightning,
-            3500 + Math.random() * 9000
-        );
-
-    } else {
-
-        lightningTimer = 0;
-
-    }
+    lightningTimer = setTimeout(
+        scheduleLightning,
+        3500 + Math.random() * 9000
+    );
 }
 
 function startLightning() {
 
     clearTimeout(lightningTimer);
 
-    lightningTimer = 0;
+    document.getElementById("lightning").style.opacity = "0";
 
     if (currentWeather === "storm") {
 
@@ -732,282 +778,132 @@ function startLightning() {
             scheduleLightning,
             2000 + Math.random() * 4000
         );
-
     }
 }
 
 
-/* =========================================
-   FETCH REAL VALLENTUNA WEATHER
-========================================= */
+/* ==================================
+   WEATHER AUDIO
+================================== */
 
-async function fetchWeather() {
+var audioContext = null;
+var masterGain = null;
+var rainGain = null;
+var windGain = null;
+var noiseBuffer = null;
 
-    // Test mode overrides live weather
-    if (TEST_MODE) {
+var audioReady = false;
 
-        setWeather(TEST_WEATHER);
-        startLightning();
-
-        return;
-    }
-
-    const url =
-        "https://api.open-meteo.com/v1/forecast" +
-        "?latitude=" + LATITUDE +
-        "&longitude=" + LONGITUDE +
-        "&current=temperature_2m,precipitation,rain,snowfall,weather_code,wind_speed_10m,wind_gusts_10m" +
-        "&timezone=Europe%2FStockholm";
-
-    try {
-
-        const response = await fetch(url, {
-            cache: "no-store"
-        });
-
-        if (!response.ok) {
-            throw new Error("Weather API unavailable");
-        }
-
-        const data = await response.json();
-
-        const w = data.current;
-
-        const code = w.weather_code;
-        const rain = w.precipitation || 0;
-        const snowfall = w.snowfall || 0;
-        const wind = w.wind_speed_10m || 0;
-        const gusts = w.wind_gusts_10m || 0;
-
-        let type = "clear";
-
-        // Thunderstorm
-        if ([95,96,99].includes(code)) {
-
-            type = "storm";
-
-        }
-
-        // Snow
-        else if (
-            [71,73,75,77,85,86].includes(code) ||
-            snowfall > 0
-        ) {
-
-            type =
-                snowfall >= 1.5 ||
-                gusts >= 45 ||
-                wind >= 35 ||
-                [75,86].includes(code)
-                ? "blizzard"
-                : "snow";
-
-        }
-
-        // Rain and showers
-        else if (
-            [51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code) ||
-            rain > 0
-        ) {
-
-            if (
-                rain >= 7.5 ||
-                [65,67,82].includes(code)
-            ) {
-
-                type = "heavy_rain";
-
-            } else if (
-                rain < 0.5 ||
-                [51,53,56].includes(code)
-            ) {
-
-                type = "drizzle";
-
-            } else {
-
-                type = "rain";
-
-            }
-
-        }
-
-        // Fog
-        else if ([45,48].includes(code)) {
-
-            type = "fog";
-
-        }
-
-        // Cloudy
-        else if ([2,3].includes(code)) {
-
-            type = "cloudy";
-
-        }
-
-        // Clear / sunny
-        else if ([0,1].includes(code)) {
-
-            const hour = Number(
-                new Intl.DateTimeFormat("en-GB", {
-                    timeZone: "Europe/Stockholm",
-                    hour: "2-digit",
-                    hourCycle: "h23"
-                }).format(new Date())
-            );
-
-            type =
-                hour >= 7 && hour < 19
-                ? "sunny"
-                : "clear";
-
-        }
-
-        setWeather(type,w.temperature_2m);
-
-        startLightning();
-
-        console.log("Vallentuna weather:",type,w);
-
-    } catch (error) {
-
-        console.warn("Weather update failed:",error);
-
-        // Keep previous weather effect
-        if (weatherInfo.textContent === "VALLENTUNA") {
-            weatherInfo.textContent =
-                "WEATHER UNAVAILABLE · VALLENTUNA";
-        }
-
-    }
-}
-
-
-/* =========================================
-   DYNAMIC WEATHER AUDIO ENGINE
-========================================= */
-
-// AUDIO SETTINGS
-
-const enableWeatherSounds = true;
-
-// Master volume: 0.0 to 1.0
-const weatherVolume = 0.35;
-
-// Thunder volume
-const thunderVolume = 1;
-
-let audioContext;
-let masterGain;
-let rainGain;
-let windGain;
-let rainSource;
-let windSource;
-
-let audioReady = false;
-
-// Create realistic noise
 function createNoiseBuffer(context) {
 
-    const length = context.sampleRate * 4;
+    var length = context.sampleRate * 4;
 
-    const buffer = context.createBuffer(
-        1,
-        length,
-        context.sampleRate
+    var buffer = context.createBuffer(
+        1,length,context.sampleRate
     );
 
-    const data = buffer.getChannelData(0);
+    var data = buffer.getChannelData(0);
 
-    for (let i = 0; i < length; i++) {
+    for (var i = 0; i < length; i++) {
         data[i] = Math.random() * 2 - 1;
     }
 
     return buffer;
 }
 
-// Initialize audio
 function initializeWeatherAudio() {
 
     if (!enableWeatherSounds) return;
 
     if (audioReady) {
+
         if (audioContext.state === "suspended") {
             audioContext.resume();
         }
+
         return;
     }
 
-    const AudioContextClass =
+    var AudioClass =
         window.AudioContext ||
         window.webkitAudioContext;
 
-    if (!AudioContextClass) return;
+    if (!AudioClass) {
+        document.getElementById("soundButton").textContent =
+            "Audio unavailable";
+        return;
+    }
 
-    audioContext = new AudioContextClass();
+    try {
 
-    masterGain = audioContext.createGain();
-    masterGain.gain.value = weatherVolume;
-    masterGain.connect(audioContext.destination);
+        audioContext = new AudioClass();
 
-    const noiseBuffer = createNoiseBuffer(audioContext);
+        masterGain = audioContext.createGain();
+        masterGain.gain.value = weatherVolume;
+        masterGain.connect(audioContext.destination);
 
-    // RAIN GENERATOR
+        noiseBuffer = createNoiseBuffer(audioContext);
 
-    rainSource = audioContext.createBufferSource();
-    rainSource.buffer = noiseBuffer;
-    rainSource.loop = true;
+        // RAIN
 
-    const rainFilter = audioContext.createBiquadFilter();
-    rainFilter.type = "lowpass";
-    rainFilter.frequency.value = 2400;
+        var rainSource = audioContext.createBufferSource();
+        rainSource.buffer = noiseBuffer;
+        rainSource.loop = true;
 
-    rainGain = audioContext.createGain();
-    rainGain.gain.value = 0;
+        var rainFilter = audioContext.createBiquadFilter();
+        rainFilter.type = "lowpass";
+        rainFilter.frequency.value = 2400;
 
-    rainSource.connect(rainFilter);
-    rainFilter.connect(rainGain);
-    rainGain.connect(masterGain);
+        rainGain = audioContext.createGain();
+        rainGain.gain.value = 0;
 
-    rainSource.start();
+        rainSource.connect(rainFilter);
+        rainFilter.connect(rainGain);
+        rainGain.connect(masterGain);
 
-    // WIND GENERATOR
+        rainSource.start(0);
 
-    windSource = audioContext.createBufferSource();
-    windSource.buffer = noiseBuffer;
-    windSource.loop = true;
+        // WIND
 
-    const windFilter = audioContext.createBiquadFilter();
-    windFilter.type = "lowpass";
-    windFilter.frequency.value = 350;
+        var windSource = audioContext.createBufferSource();
+        windSource.buffer = noiseBuffer;
+        windSource.loop = true;
 
-    windGain = audioContext.createGain();
-    windGain.gain.value = 0;
+        var windFilter = audioContext.createBiquadFilter();
+        windFilter.type = "lowpass";
+        windFilter.frequency.value = 350;
 
-    windSource.connect(windFilter);
-    windFilter.connect(windGain);
-    windGain.connect(masterGain);
+        windGain = audioContext.createGain();
+        windGain.gain.value = 0;
 
-    windSource.start();
+        windSource.connect(windFilter);
+        windFilter.connect(windGain);
+        windGain.connect(masterGain);
 
-    audioReady = true;
+        windSource.start(0);
 
-    updateWeatherAudio(currentWeather);
+        audioReady = true;
+
+        updateWeatherAudio(currentWeather);
+
+        document.getElementById("soundButton").style.display =
+            "none";
+
+    } catch (error) {
+
+        document.getElementById("soundButton").textContent =
+            "Audio unavailable";
+    }
 }
-
-/* =========================================
-   ADJUST SOUND TO CURRENT WEATHER
-========================================= */
 
 function updateWeatherAudio(type) {
 
     if (!audioReady) return;
 
-    let rain = 0;
-    let wind = 0;
+    var rain = 0;
+    var wind = 0;
 
-    switch (type) {
+    switch(type) {
 
         case "drizzle":
             rain = 0.12;
@@ -1041,50 +937,35 @@ function updateWeatherAudio(type) {
             break;
     }
 
-    const now = audioContext.currentTime;
+    var now = audioContext.currentTime;
 
-    // Smoothly transition between sounds
-    rainGain.gain.setTargetAtTime(
-        rain, now, 2
-    );
-
-    windGain.gain.setTargetAtTime(
-        wind, now, 2
-    );
+    rainGain.gain.setTargetAtTime(rain,now,2);
+    windGain.gain.setTargetAtTime(wind,now,2);
 }
-
-/* =========================================
-   THUNDER SOUND
-========================================= */
 
 function playThunder() {
 
     if (!audioReady) return;
 
-    const context = audioContext;
+    var source = audioContext.createBufferSource();
+    source.buffer = noiseBuffer;
 
-    const buffer = createNoiseBuffer(context);
-
-    const source = context.createBufferSource();
-    source.buffer = buffer;
-
-    const filter = context.createBiquadFilter();
+    var filter = audioContext.createBiquadFilter();
     filter.type = "lowpass";
     filter.frequency.value = 130;
 
-    const gain = context.createGain();
+    var gain = audioContext.createGain();
 
-    const now = context.currentTime;
+    var now = audioContext.currentTime;
 
-    // Thunder starts loudly and fades away
-    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.setValueAtTime(0.001,now);
 
     gain.gain.exponentialRampToValueAtTime(
-        thunderVolume, now + 0.15
+        thunderVolume,now + 0.15
     );
 
     gain.gain.exponentialRampToValueAtTime(
-        0.001, now + 3.5
+        0.001,now + 3.5
     );
 
     source.connect(filter);
@@ -1095,82 +976,188 @@ function playThunder() {
     source.stop(now + 3.6);
 }
 
-/* =========================================
-   START AUDIO ON USER INTERACTION
-========================================= */
-
-// TV browsers usually require user interaction
-// before allowing sound playback.
-
-document.addEventListener(
-    "click",
-    initializeWeatherAudio
-);
-
-document.addEventListener(
-    "keydown",
-    initializeWeatherAudio
-);
-
-/* =========================================
-   INITIALIZE
-========================================= */
-
-resizeCanvas();
-
-animateWeather();
-
-fetchWeather();
-
-// Refresh weather every 10 minutes
-setInterval(fetchWeather,weatherRefresh);
+document.getElementById("soundButton").onclick =
+    initializeWeatherAudio;
 
 
+/* ==================================
+   LIVE VALLENTUNA WEATHER
+================================== */
 
-/* =========================================
-   AUTOMATIC FULLSCREEN
-========================================= */
+function fetchWeather() {
+
+    if (TEST_MODE) {
+        setWeather(TEST_WEATHER);
+        return;
+    }
+
+    var url =
+        "https://api.open-meteo.com/v1/forecast" +
+        "?latitude=" + LATITUDE +
+        "&longitude=" + LONGITUDE +
+        "&current=temperature_2m,precipitation,rain,snowfall,weather_code,wind_speed_10m,wind_gusts_10m" +
+        "&timezone=Europe%2FStockholm";
+
+    var xhr = new XMLHttpRequest();
+
+    xhr.open("GET",url,true);
+    xhr.timeout = 12000;
+
+    xhr.onload = function() {
+
+        if (xhr.status !== 200) {
+            weatherInfo.textContent =
+                "WEATHER UNAVAILABLE · VALLENTUNA";
+            return;
+        }
+
+        try {
+
+            var data = JSON.parse(xhr.responseText);
+            var w = data.current;
+
+            var code = w.weather_code;
+            var rain = w.precipitation || 0;
+            var snowfall = w.snowfall || 0;
+            var wind = w.wind_speed_10m || 0;
+            var gusts = w.wind_gusts_10m || 0;
+
+            var type = "clear";
+
+            if ([95,96,99].indexOf(code) !== -1) {
+
+                type = "storm";
+
+            } else if (
+                [71,73,75,77,85,86].indexOf(code) !== -1 ||
+                snowfall > 0
+            ) {
+
+                type =
+                    snowfall >= 1.5 ||
+                    gusts >= 45 ||
+                    wind >= 35 ||
+                    [75,86].indexOf(code) !== -1
+                    ? "blizzard"
+                    : "snow";
+
+            } else if (
+                [51,53,55,56,57,61,63,65,66,67,80,81,82].indexOf(code) !== -1 ||
+                rain > 0
+            ) {
+
+                if (
+                    rain >= 7.5 ||
+                    [65,67,82].indexOf(code) !== -1
+                ) {
+
+                    type = "heavy_rain";
+
+                } else if (
+                    rain < 0.5 ||
+                    [51,53,56].indexOf(code) !== -1
+                ) {
+
+                    type = "drizzle";
+
+                } else {
+
+                    type = "rain";
+
+                }
+
+            } else if ([45,48].indexOf(code) !== -1) {
+
+                type = "fog";
+
+            } else if ([2,3].indexOf(code) !== -1) {
+
+                type = "cloudy";
+
+            } else if ([0,1].indexOf(code) !== -1) {
+
+                var hour = new Date().getHours();
+
+                type =
+                    hour >= 7 && hour < 19
+                    ? "sunny"
+                    : "clear";
+            }
+
+            setWeather(type,w.temperature_2m);
+
+        } catch(error) {
+
+            weatherInfo.textContent =
+                "WEATHER DATA ERROR · VALLENTUNA";
+        }
+    };
+
+    xhr.onerror = function() {
+        weatherInfo.textContent =
+            "WEATHER UNAVAILABLE · VALLENTUNA";
+    };
+
+    xhr.ontimeout = function() {
+        weatherInfo.textContent =
+            "WEATHER TIMEOUT · VALLENTUNA";
+    };
+
+    xhr.send();
+}
+
+
+/* ==================================
+   FULLSCREEN
+================================== */
 
 function enterFullscreen() {
 
-    const page = document.documentElement;
-
-    // Already fullscreen?
-    if (
-        document.fullscreenElement ||
-        document.webkitFullscreenElement
-    ) {
-        return;
-    }
+    var page = document.documentElement;
 
     try {
 
         if (page.requestFullscreen) {
 
-            const result = page.requestFullscreen();
+            var result = page.requestFullscreen();
 
             if (result && result.catch) {
-                result.catch(() => {});
+                result.catch(function(){});
             }
 
         } else if (page.webkitRequestFullscreen) {
 
             page.webkitRequestFullscreen();
-
         }
 
-    } catch (error) {
-        console.log("Fullscreen unavailable");
-    }
+    } catch(error) {}
 }
 
-// Attempt fullscreen when website loads
-window.addEventListener("load", function() {
-    enterFullscreen();
+document.addEventListener("click",function(event) {
+
+    if (event.target.id !== "soundButton") {
+        enterFullscreen();
+    }
 });
 
-// Attempt again when user interacts
-document.addEventListener("click", enterFullscreen);
-document.addEventListener("keydown", enterFullscreen);
-document.addEventListener("touchstart", enterFullscreen);
+document.addEventListener("keydown",enterFullscreen);
 
+
+/* ==================================
+   START WEBSITE
+================================== */
+
+resizeCanvas();
+
+if (ctx) {
+    animateWeather();
+}
+
+fetchWeather();
+
+setInterval(fetchWeather,weatherRefresh);
+
+</script>
+
+</body>
+</html>
